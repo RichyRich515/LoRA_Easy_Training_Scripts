@@ -1,4 +1,47 @@
+# RichyRich515 fork
+
+This is a fork of [67372a/LoRA_Easy_Training_Scripts](https://github.com/67372a/LoRA_Easy_Training_Scripts) that adds
+MOSS-Image LoRA training. The backend and sd-scripts submodules point at the matching forks
+([backend](https://github.com/RichyRich515/LoRA_Easy_Training_scripts_Backend),
+[sd-scripts](https://github.com/RichyRich515/sd-scripts)); all work is on the `moss-image` branch, which is the default.
+
+## Getting started (MOSS-Image)
+
+Requirements (Windows):
+- NVIDIA driver 580 or newer (the install uses torch 2.14.1 + CUDA 13.0)
+- [git](https://git-scm.com/) and Python 3.11+
+- [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development
+  with C++", for Compile = blocks (torch.compile needs the MSVC compiler; it is found automatically)
+- ~27 GB for the MOSS-Image-Base pipeline, 24 GB VRAM recommended
+
+Install:
+```
+git clone --recurse-submodules https://github.com/RichyRich515/LoRA_Easy_Training_Scripts
+cd LoRA_Easy_Training_Scripts
+install.bat
+```
+
+Download the model (the text encoder, tokenizer and VAE come with it), using the CLI the install provides:
+```
+backend\sd_scripts\venv\Scripts\hf.exe download OpenMOSS-Team/MOSS-Image-Base --local-dir MOSS-Image-Base --include "model_index.json" "scheduler/*" "text_encoder/*" "tokenizer/*" "transformer/*" "vae/*"
+```
+
+Train: start with `run.bat`, enable **Train MOSS-Image** in the args list and set the model to the `MOSS-Image-Base`
+folder (Text Encoder and VAE can stay empty). The first run installs a transformers 5 overlay for the Qwen3.5 text
+encoder and caches the text encoder outputs. Fast settings: Attention `cudnn`, Compile `blocks`, INT8 Base `on`
+(~1.2 s per 1024² image on an RTX 4090). When loading a shared config, change the model, image, output and
+`network_weights` paths to your own. Details: [docs/moss_train_network.md](https://github.com/RichyRich515/sd-scripts/blob/moss-image/docs/moss_train_network.md).
+
+The resulting LoRA works in ComfyUI and Forge with both the split (diffusers) and fused (single-file, including
+`*_int8_convrot`) MOSS-Image checkpoints.
+
 # Updates
+
+## 10/22/2026
+- MOSS-Image LoRA training (UI section, backend routing, `moss_train_network.py`), with cuDNN attention,
+  per-block torch.compile and ConvRot INT8 base weights
+- torch 2.14.1 + cu130 (cuDNN 9.24 fixes NaN attention gradients of cuDNN 9.7), xformers 0.0.35, torchao 0.18,
+  triton 3.8; the torch 2.7 flash-attn wheels are no longer installed
 
 ## 05/30/2026
 - Swap to using uv instead of pip. If you have an existing install, git pull first, then run the typical update script, otherwise you may have to run the updat script again should it fail.
