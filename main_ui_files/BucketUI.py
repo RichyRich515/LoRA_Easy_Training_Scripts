@@ -68,8 +68,9 @@ class BucketWidget(BaseWidget):
 
         # update element inputs - use widget's current value as default if not in saved config
         self.widget.bucket_group.setChecked(dataset_args.get("enable_bucket", self.widget.bucket_group.isChecked()))
-        no_upscale = dataset_args.get("bucket_no_upscale", self.widget.bucket_no_upscale.isChecked())
-        multires = dataset_args.get("multires_training", self.widget.multires_training.isChecked())
+        # optional flags are only saved when checked, so a missing key means unchecked
+        no_upscale = dataset_args.get("bucket_no_upscale", False)
+        multires = dataset_args.get("multires_training", False)
         if no_upscale and multires:
             multires = False
 
